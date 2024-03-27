@@ -41,4 +41,7 @@ fn main() {
             println!("After sorting: {:?}", data);
         }
     }
+    let mut data_str = vec!["banana", "apple", "orange", "grape"];
+    bubble_sort(&mut data_str);
+    println!("Sorted string array: {:?}", data_str);
 }
