@@ -14,11 +14,13 @@ pub struct Elements {
 
 #[derive(StructOpt)]
 pub enum Command {
-    #[structopt(name = "sort")]
-    Sort(Elements),
+    #[structopt(name = "asc")]
+    Asc(Elements),
+    #[structopt(name = "desc")]
+    Desc(Elements),
 }
 
-fn bubble_sort<T: PartialOrd>(arr: &mut [T]) {
+fn bubble_sort<T: PartialOrd>(arr: &mut [T], desc: bool) {
     let n = arr.len();
     for i in 0..n {
         for j in 0..n - i - 1 {
@@ -27,21 +29,32 @@ fn bubble_sort<T: PartialOrd>(arr: &mut [T]) {
             }
         }
     }
+    if desc {
+        arr.reverse();
+    }
 }
 
 fn main() {
     println!("Hello, world!");
+    let mut data_str = vec!["banana", "apple", "orange", "grape"];
     let arg = Args::from_args();
     let arg2 = arg;
     match arg2.command {
-        Command::Sort(e) => {
+        Command::Asc(e) => {
             let mut data = e.elements;
             println!("Before sorting: {:?}", data);
-            bubble_sort(&mut data);
+            bubble_sort(&mut data, false);
             println!("After sorting: {:?}", data);
+            bubble_sort(&mut data_str, false);
+            println!("Sorted string array: {:?}", data_str);
+        }
+        Command::Desc(e) => {
+            let mut data = e.elements;
+            println!("Before sorting: {:?}", data);
+            bubble_sort(&mut data, true);
+            println!("After sorting: {:?}", data);
+            bubble_sort(&mut data_str, true);
+            println!("Sorted string array: {:?}", data_str);
         }
     }
-    let mut data_str = vec!["banana", "apple", "orange", "grape"];
-    bubble_sort(&mut data_str);
-    println!("Sorted string array: {:?}", data_str);
 }
