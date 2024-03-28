@@ -1,60 +1,63 @@
+use std::fmt::Debug;
+use std::str::FromStr;
 use structopt::StructOpt;
 
-#[derive(StructOpt)]
-#[structopt(name = "app")]
-pub struct Args {
+#[derive(Debug, StructOpt)]
+struct Opt {
     #[structopt(subcommand)]
-    pub command: Command,
+    cmd: Command,
 }
 
-#[derive(StructOpt)]
-pub struct Elements {
-    pub elements: Vec<i32>,
+#[derive(Debug, StructOpt)]
+enum Command {
+    Asc {
+        #[structopt(short, long)]
+        data: Vec<String>,
+    },
+    Desc {
+        #[structopt(short, long)]
+        data: Vec<String>,
+    },
 }
 
-#[derive(StructOpt)]
-pub enum Command {
-    #[structopt(name = "asc")]
-    Asc(Elements),
-    #[structopt(name = "desc")]
-    Desc(Elements),
-}
-
-fn bubble_sort<T: PartialOrd>(arr: &mut [T], desc: bool) {
+fn bubble_sort<T: PartialOrd>(arr: &mut [T], asc: bool) {
     let n = arr.len();
     for i in 0..n {
         for j in 0..n - i - 1 {
-            if arr[j] > arr[j + 1] {
+            if (asc && arr[j] > arr[j + 1]) || (!asc && arr[j] < arr[j + 1]) {
                 arr.swap(j, j + 1);
             }
         }
     }
-    if desc {
-        arr.reverse();
+}
+
+fn parse_and_sort<T>(data: Vec<String>, asc: bool)
+where
+    T: FromStr + PartialOrd + Debug,
+    <T as FromStr>::Err: Debug,
+{
+    let mut parsed_data: Vec<_> = data
+        .iter()
+        .map(|s| s.parse::<T>().unwrap_or_else(|_| panic!("Failed to parse")))
+        .collect();
+    println!("Before sorting: {:?}", parsed_data);
+    bubble_sort(&mut parsed_data, asc);
+    if asc {
+        println!("After sorted array in ascending order: {:?}", parsed_data);
+    } else {
+        println!("After sorted array in descending order: {:?}", parsed_data);
     }
 }
 
 fn main() {
-    println!("Hello, world!");
-    let mut data_str = vec!["banana", "apple", "orange", "grape"];
-    let arg = Args::from_args();
-    let arg2 = arg;
-    match arg2.command {
-        Command::Asc(e) => {
-            let mut data = e.elements;
-            println!("Before sorting: {:?}", data);
-            bubble_sort(&mut data, false);
-            println!("After sorting: {:?}", data);
-            bubble_sort(&mut data_str, false);
-            println!("Sorted string array: {:?}", data_str);
+    let opt = Opt::from_args();
+
+    match opt.cmd {
+        Command::Asc { data } => {
+            parse_and_sort::<String>(data, true);
         }
-        Command::Desc(e) => {
-            let mut data = e.elements;
-            println!("Before sorting: {:?}", data);
-            bubble_sort(&mut data, true);
-            println!("After sorting: {:?}", data);
-            bubble_sort(&mut data_str, true);
-            println!("Sorted string array: {:?}", data_str);
+        Command::Desc { data } => {
+            parse_and_sort::<String>(data, false);
         }
     }
 }
