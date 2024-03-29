@@ -24,7 +24,11 @@ fn bubble_sort<T: PartialOrd>(arr: &mut [T], asc: bool) {
     let n = arr.len();
     for i in 0..n {
         for j in 0..n - i - 1 {
-            if (asc && arr[j] > arr[j + 1]) || (!asc && arr[j] < arr[j + 1]) {
+            if asc {
+                if arr[j + 1].partial_cmp(&arr[j]).unwrap().is_lt() {
+                    arr.swap(j, j + 1);
+                }
+            } else if arr[j + 1].partial_cmp(&arr[j]).unwrap().is_gt() {
                 arr.swap(j, j + 1);
             }
         }
